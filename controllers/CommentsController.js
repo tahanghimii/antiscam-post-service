@@ -1,7 +1,7 @@
-import { Comment } from '../models/Comment.js';
-import { Post } from '../models/Post.js';
+const Post = require('../models/Post');
+const Comment = require('../models/Comment');
 
-export const CommentsController = {
+const CommentsController = {
   // Create a new comment and associate it with a post
   async createComment(req, res) {
     try {
@@ -57,3 +57,5 @@ export const CommentsController = {
     }
   }
 };
+
+module.exports = CommentsController;

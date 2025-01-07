@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import { v4 as uuid } from 'uuid';
+const mongoose = require('mongoose');
+const { v4: uuid } = require('uuid');
 
 const { Schema, model } = mongoose;
 
@@ -16,5 +16,4 @@ const CommentSchema = new Schema({
   },
   createdAt: { type: Date, default: Date.now }
 });
-
-export const Comment = model('Comment', CommentSchema);
+module.exports =  model('Comment', CommentSchema);

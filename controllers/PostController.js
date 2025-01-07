@@ -1,12 +1,19 @@
-import { Post } from '../models/Post.js';
+const Post = require('../models/Post');
 
-export const PostController = {
-  // Create a new post
+const PostController = {
   async createPost(req, res) {
     try {
-      const { content, mediaUrl, username, firstName, lastName, avatarURL } = req.body;
+      const { content, mediaUrl } = req.body;
+      const { username, firstName, lastName, avatarURL } = req.user;
 
-      const post = new Post({ content, mediaUrl, username, firstName, lastName, avatarURL });
+      const post = new Post({
+        content,
+        mediaUrl,
+        username,
+        firstName,
+        lastName,
+        avatarURL,
+      });
       await post.save();
 
       res.status(201).json(post);
@@ -15,17 +22,17 @@ export const PostController = {
     }
   },
 
-  // Get all posts
   async getAllPosts(req, res) {
     try {
-      const posts = await Post.find().sort({ createdAt: -1 });
-      res.status(200).json(posts);
+      const { username } = req.user;
+      const posts = await Post.find({ username }).sort({ createdAt: -1 });
+  
+      res.status(200).json({ posts });
     } catch (error) {
-      res.status(500).json({ message: 'Error fetching posts', error });
+      res.status(500).json({ message: 'Error fetching user posts', error });
     }
   },
 
-  // Get a specific post by ID
   async getPostById(req, res) {
     try {
       const { postId } = req.params;
@@ -40,7 +47,6 @@ export const PostController = {
     }
   },
 
-  // Update a post
   async updatePost(req, res) {
     try {
       const { postId } = req.params;
@@ -62,7 +68,6 @@ export const PostController = {
     }
   },
 
-  // Delete a post
   async deletePost(req, res) {
     try {
       const { postId } = req.params;
@@ -72,7 +77,6 @@ export const PostController = {
         return res.status(404).json({ message: 'Post not found' });
       }
 
-     
       await Comment.deleteMany({ _id: { $in: post.comments } });
 
       res.status(200).json({ message: 'Post deleted successfully' });
@@ -81,3 +85,5 @@ export const PostController = {
     }
   }
 };
+
+module.exports = PostController;

@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import { v4 as uuid } from 'uuid';
+const mongoose = require('mongoose');
+const { v4: uuid } = require('uuid');
 
 const { Schema, model } = mongoose;
 
@@ -21,4 +21,4 @@ const PostSchema = new Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
-export const Post = model('Post', PostSchema);
+module.exports = model('Post', PostSchema);
