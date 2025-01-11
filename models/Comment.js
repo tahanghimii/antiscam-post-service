@@ -4,7 +4,6 @@ const { v4: uuid } = require('uuid');
 const { Schema, model } = mongoose;
 
 const CommentSchema = new Schema({
-  _id: { type: String, default: uuid },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   username: { type: String, required: true },

@@ -4,13 +4,13 @@ const {
   getAllPosts,
   getPostById,
   updatePost,
-  deletePost
+  deletePost,likePost,dislikePost,addComment,editComment,deleteComment
 } = require('../controllers/PostController');
 
 const {
   createComment,
   getCommentsByPost,
-  deleteComment
+  
 } = require('../controllers/CommentsController');
 
 const router = express.Router();
@@ -20,9 +20,13 @@ router.get('/posts', getAllPosts);
 router.get('/posts/:postId', getPostById);
 router.put('/posts/:postId', updatePost);
 router.delete('/posts/:postId', deletePost);
+router.post('/posts/:postId/like', likePost);
+router.post('/posts/:postId/dislike', dislikePost);
 
-router.post('/posts/:postId/comments', createComment);
+router.post('/posts/:postId/comments', addComment);
 router.get('/posts/:postId/comments', getCommentsByPost);
-router.delete('/comments/:commentId', deleteComment);
+router.delete('/posts/:postId/comments/:commentId', deleteComment);
+router.put('/posts/:postId/comments/:commentId', editComment);
+
 
 module.exports = router;
