@@ -7,6 +7,7 @@ const PostSchema = new Schema({
   _id: { type: String, default: uuid },
   content: { type: String, required: true },
   mediaUrl: { type: String },
+  mediaType: { type: String },
   likes: {
     _id: { type: String, default: uuid },
     likeCount: { type: Number, default: 0 },
@@ -14,6 +15,7 @@ const PostSchema = new Schema({
     dislikedBy: [{ type: Schema.Types.Mixed }],
   },
   comments: [{ // This will store the entire comment object, not just a reference
+    _id: { type: String, default: uuid },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     username: { type: String, required: true },

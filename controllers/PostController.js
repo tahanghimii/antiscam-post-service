@@ -1,27 +1,47 @@
 const Post = require('../models/Post');
 const Comment  = require('../models/Comment');
+const upload = require('../middleware/upload'); // Assuming you saved the multer config as upload.js
 
 const PostController = {
   async createPost(req, res) {
-    try {
-      const { content, mediaUrl } = req.body;
-      const { username, firstName, lastName, avatarURL } = req.user;
-
-      const post = new Post({
-        content,
-        mediaUrl,
-        username,
-        firstName,
-        lastName,
-        avatarURL,
-      });
-      await post.save();
-
-      res.status(201).json(post);
-    } catch (error) {
-      res.status(500).json({ message: 'Error creating post', error });
-    }
-  },
+    upload.single('media')(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({ message: 'File upload failed', error: err });
+      }
+  
+      try {
+        const { content } = req.body;
+        const { username, firstName, lastName, avatarURL } = req.user;
+  
+        // Initialize variables for media
+        let mediaUrl = null;
+        let mediaType = null;
+  
+        if (req.file) {
+          mediaUrl = `${req.protocol}://localhost:8080/posts-service/uploads/${req.file.filename}`;
+          mediaType = req.file.mimetype.startsWith('image/') ? 'image' : 'video';
+        }
+  
+        const post = new Post({
+          content,
+          mediaUrl,
+          mediaType,
+          username,
+          firstName,
+          lastName,
+          avatarURL,
+        });
+  
+        await post.save();
+  
+        res.status(201).json(post);
+      } catch (error) {
+        res.status(500).json({ message: 'Error creating post', error });
+      }
+    });
+  }
+  
+  ,
 
   async getAllPosts(req, res) {
     try {
@@ -49,25 +69,65 @@ const PostController = {
   },
 
   async updatePost(req, res) {
-    try {
-      const { postId } = req.params;
-      const { content, mediaUrl } = req.body;
-
-      const post = await Post.findByIdAndUpdate(
-        postId,
-        { content, mediaUrl, updatedAt: Date.now() },
-        { new: true }
-      );
-
-      if (!post) {
-        return res.status(404).json({ message: 'Post not found' });
+    upload.single('media')(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({ message: 'File upload failed', error: err });
       }
-
-      res.status(200).json(post);
-    } catch (error) {
-      res.status(500).json({ message: 'Error updating post', error });
-    }
-  },
+  
+      try {
+        const { postId } = req.params;
+        const { content, removeMedia } = req.body;
+        console.log('Content:', content);
+        console.log('Remove Media:', removeMedia);
+  
+        // Initialize variables for updates
+        let updateFields = { content, updatedAt: Date.now() };
+  
+        // If removeMedia is true, use $unset to remove the media fields
+        if (removeMedia === 'true') {
+          console.log('Media is being removed');
+          updateFields = {
+            ...updateFields,
+            $unset: { mediaUrl: "", mediaType: "" }, // Use $unset to remove fields
+          };
+        }
+  
+        // If a new file is uploaded, update the media fields
+        if (req.file) {
+          const mediaUrl = `${req.protocol}://localhost:8080/posts-service/uploads/${req.file.filename}`;
+          const mediaType = req.file.mimetype.startsWith('image/') ? 'image' : 'video';
+  
+          updateFields = {
+            ...updateFields,
+            $set: {
+              mediaUrl: mediaUrl,
+              mediaType: mediaType,
+            },
+          };
+        }
+  
+        // Find and update the post
+        const post = await Post.findByIdAndUpdate(
+          postId,
+          updateFields,
+          { new: true, useFindAndModify: false }
+        );
+  
+        if (!post) {
+          return res.status(404).json({ message: 'Post not found' });
+        }
+  
+        res.status(200).json(post);
+      } catch (error) {
+        res.status(500).json({ message: 'Error updating post', error });
+      }
+    });
+  }
+  
+  
+  
+  
+  ,
 
   async deletePost(req, res) {
     try {
